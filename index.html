@@ -20,11 +20,6 @@
         <a class="brand" href="#inicio" aria-label="Ateliê Roberta Partezani, início"><span class="brand-script">Ateliê
         </span><span class="brand-name">Roberta Partezani
         </span></a>
-        <form class="search" role="search">
-          <label class="sr-only" for="busca">Pesquisar no ateliê
-          </label><input id="busca" type="search" placeholder="O que você procura?"><button type="submit" aria-label="Pesquisar">⌕
-          </button><span class="search-status" id="search-status" role="status" aria-live="polite"></span>
-        </form>
         <nav class="quick-actions" aria-label="Ações do cliente">
           <a href="#cadastro"><span aria-hidden="true">&#128100;&#65038;
           </span><small>Cadastro
@@ -682,104 +677,6 @@
       });
     });
 
-    const searchForm = document.querySelector('.search');
-    const searchInput = document.querySelector('#busca');
-    const searchStatus = document.querySelector('#search-status');
-    const searchableItems = document.querySelectorAll('.work-item, .product');
-    const normalizeSearchText = (text) => text
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLocaleLowerCase('pt-BR');
-
-    searchForm.addEventListener('submit', (event) => {
-      event.preventDefault();
-      const query = normalizeSearchText(searchInput.value.trim());
-      const terms = query.split(/\s+/).filter(Boolean);
-      const matches = [];
-      const kitNumberMatch = query.match(/\bkit\s*([1-9])\b/) || query.match(/^([1-9])$/);
-      const targetKit = kitNumberMatch
-        ? document.querySelector(`#kits-gallery [aria-controls="kit-${kitNumberMatch[1]}-details"]`)
-        : null;
-      const testimonialsSection = document.querySelector('#depoimentos');
-      const testimonialsHeading = normalizeSearchText(
-        testimonialsSection.querySelector('h2').textContent
-      );
-      const matchesTestimonials = terms.length > 0
-        && terms.every((term) => testimonialsHeading.includes(term));
-      const aboutSection = document.querySelector('#quem-faz');
-      const aboutHeading = normalizeSearchText(aboutSection.querySelector('h2').textContent);
-      const aboutQuestion = /\b(quem|o que|do que se trata)\b/.test(query);
-      const matchesAbout = terms.length > 0
-        && (aboutQuestion || terms.every((term) => aboutHeading.includes(term)));
-      const worksSection = document.querySelector('#trabalhos');
-      const worksHeading = normalizeSearchText(worksSection.querySelector('h2').textContent);
-      const matchesWorks = terms.length > 0
-        && terms.every((term) => worksHeading.includes(term));
-      const orderSection = document.querySelector('#contato');
-      const matchesOrder = terms.some((term) => [
-        'comprar',
-        'pedir',
-        'whatsapp',
-        'endereco',
-        'instagram',
-        'horario',
-        'horarios',
-        'email',
-        'e-mail',
-        'telefone'
-      ].includes(term));
-
-      searchableItems.forEach((item) => {
-        const imageAlt = Array.from(item.querySelectorAll('img'))
-          .map((image) => image.alt)
-          .join(' ');
-        const searchableText = normalizeSearchText(`${item.textContent} ${imageAlt}`);
-        const isMatch = terms.length === 0 || terms.every((term) => searchableText.includes(term));
-
-        item.classList.toggle('search-match', isMatch && terms.length > 0);
-        if (isMatch && terms.length > 0) matches.push(item);
-      });
-
-      document.querySelectorAll('.work-carousel').forEach((carousel) => {
-        const gallery = carousel.querySelector('.work-grid');
-        const buttons = carousel.querySelectorAll('[data-gallery-direction]');
-        gallery.scrollLeft = 0;
-        buttons[0].disabled = true;
-        buttons[1].disabled = gallery.scrollWidth <= gallery.clientWidth + 1;
-      });
-
-      if (terms.length === 0) {
-        searchStatus.textContent = 'Exibindo todos os trabalhos, kits e serviços.';
-      } else if (matchesOrder) {
-        searchStatus.textContent = 'Seção de pedidos e contato encontrada.';
-        orderSection.scrollIntoView({ behavior: 'auto', block: 'start' });
-      } else if (targetKit) {
-        searchStatus.textContent = `Kit ${kitNumberMatch[1]} encontrado.`;
-        targetKit.closest('.work-item').scrollIntoView({
-          behavior: 'smooth',
-          block: 'nearest',
-          inline: 'center'
-        });
-      } else if (matchesWorks) {
-        searchStatus.textContent = 'Seção Trabalhos feitos encontrada.';
-        worksSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } else if (matchesAbout) {
-        searchStatus.textContent = 'Seção Quem somos encontrada.';
-        aboutSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } else if (matchesTestimonials) {
-        searchStatus.textContent = 'Seção Depoimentos encontrada.';
-        testimonialsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } else if (matches.length === 0) {
-        searchStatus.textContent = `Nenhum resultado encontrado para "${searchInput.value.trim()}".`;
-      } else {
-        searchStatus.textContent = `${matches.length} resultado${matches.length === 1 ? '' : 's'} encontrado${matches.length === 1 ? '' : 's'}.`;
-        matches[0].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
-      }
-    });
-
-    searchInput.addEventListener('input', () => {
-      if (searchInput.value.trim() === '') searchForm.requestSubmit();
-    });
   </script>
   </body>
 </html>
